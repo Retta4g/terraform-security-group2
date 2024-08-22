@@ -3,9 +3,10 @@ terraform {
     organization = "027-spring-cloud"
 
     workspaces {
-      name = "my_first_workspace"
+      name = "my-workspace-ec2"
     }
   }
+  
   required_providers {
     aws = {
       source  = "hashicorp/aws"
