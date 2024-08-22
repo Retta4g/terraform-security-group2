@@ -1,12 +1,12 @@
-terraform {
-  cloud {
-    organization = "027-spring-cloud"
+terraform { 
+  cloud { 
+    
+    organization = "02-spring-cloud" 
 
-    workspaces {
-      name = "my-workspace-ec2"
-    }
-  }
-  
+    workspaces { 
+      name = "my-workspace-ec2" 
+    } 
+  } 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
