@@ -1,12 +1,12 @@
-terraform { 
-  cloud { 
-    
-    organization = "02-spring-cloud" 
+terraform {
+  cloud {
 
-    workspaces { 
-      name = "my-workspace-ec2" 
-    } 
-  } 
+    organization = "02-spring-cloud"
+
+    workspaces {
+      name = "my-workspace-ec2"
+    }
+  }
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -35,16 +35,16 @@ module "security" {
       "description" = "Security Group for Web Tier"
       "ingress_rules" = [
         {
-          to_port = 0
-          from_port = 0
+          to_port     = 0
+          from_port   = 0
           cidr_blocks = ["0.0.0.0/0"]
-          protocol = "-1"
+          protocol    = "-1"
         },
         {
-          to_port = 2
-          from_port = 2
+          to_port     = 2
+          from_port   = 2
           cidr_blocks = ["0.0.0.0/0"]
-          protocol = "tcp"
+          protocol    = "tcp"
         }
       ]
     },
@@ -52,17 +52,17 @@ module "security" {
       "description" = "xvyz"
       "egress_rule s" = [
         {
-          to_port = 0
-          from_port = 0
-          protocol = "tcp"
+          to_port     = 0
+          from_port   = 0
+          protocol    = "tcp"
           cidr_blocks = ["0.0.0.0/0"]
         }
       ]
       "ingress_rules" = [
         {
-          to_port = 0 # 1
-          from_port = 0 # 1
-          protocol = "tcp" #3
+          to_port     = 0     # 1
+          from_port   = 0     # 1
+          protocol    = "tcp" #3
           cidr_blocks = ["0.0.0.0/0"]
         }
       ]
