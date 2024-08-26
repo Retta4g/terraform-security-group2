@@ -1,38 +1,31 @@
-# This is a basic workflow to help you get started with Actions
+name: Manage EC2 Resources
 
-name: Create EC2 Resources
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ] # git push
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ] # git checkout -b new_branch
-                         # create pull request
-                         # from new_branch to main branch
-
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose action to perform (apply/destroy)'
+        required: true
+        default: 'apply'
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.SECRET_PRIME }} # this is just a sensitive value bleongs to your repo
+  AWS_ACCESS_KEY_ID: ${{ secrets.SECRET_PRIME }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
   AWS_REGION: us-east-1
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   terraform:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4
       
       - name: My First Terraform Setup
-        uses: hashicorp/setup-terraform@v1 # installs the terraform application
+        uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.MY_TERRAFORM_LOGIN_TOKEN }}
       
@@ -44,13 +37,11 @@ jobs:
 
       - name: Run Terraform Plan
         run: terraform plan
-      
-      - name: Run Terraform Apply 
+
+      - name: Run Terraform Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
         run: terraform apply -auto-approve
       
-      #- name: Run Terraform Destroy 
-          #run: terraform destroy -auto-approve
-
-      # 1 Install terraform - COMPLETE
-      # 2 TERRAFORM LOGIN | copy a token and paste on our machine - COMPLETE
-      # 3 Authentication with AWS Account - COMPLETE
+      - name: Run Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        run: terraform destroy -auto-approve
