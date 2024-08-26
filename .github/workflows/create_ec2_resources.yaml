@@ -1,10 +1,7 @@
 name: Manage EC2 Resources
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  
   workflow_dispatch:
     inputs:
       action:
@@ -37,11 +34,13 @@ jobs:
 
       - name: Run Terraform Plan
         run: terraform plan
+        id: terraform_plan
 
       - name: Run Terraform Apply
-        if: ${{ github.event.inputs.action == 'apply' }}
+        if: ${{ github.event.inputs.action == 'apply' && steps.terraform_plan.outcome == 'success' }}
         run: terraform apply -auto-approve
+        id: terraform_apply
       
       - name: Run Terraform Destroy
-        if: ${{ github.event.inputs.action == 'destroy' }}
+        if: ${{ github.event.inputs.action == 'destroy' && steps.terraform_plan.outcome == 'success' }}
         run: terraform destroy -auto-approve
