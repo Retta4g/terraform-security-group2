@@ -33,12 +33,13 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Run Terraform Plan
-        run: terraform plan
+        run: terraform plan -out tfplan
         id: terraform_plan
+
 
       - name: Run Terraform Apply
         if: ${{ github.event.inputs.action == 'apply' && steps.terraform_plan.outcome == 'success' }}
-        run: terraform apply -auto-approve
+        run: terraform apply tfplan
         id: terraform_apply
       
       - name: Run Terraform Destroy
