@@ -5,26 +5,26 @@ resource "aws_security_group" "default" {
   vpc_id      = var.vpc_id
  
   dynamic "ingress" {
-    for_each = each.value.ingress_rules != null ? each.value.ingress_rules : []
+    for_each = length(each.value.ingress_rules) > 0 ? each.value.ingress_rules : []
     content {
       description = ingress.value.description
       from_port   = ingress.value.from_port
       to_port     = ingress.value.to_port
       protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidr_blocks != null ? ingress.value.cidr_blocks : null
-      security_groups = ingress.value.security_groups != null ? ingress.value.security_groups : null
+      cidr_blocks = length(ingress.value.cidr_blocks) > 0 ? ingress.value.cidr_blocks : []
+      security_groups = length(ingress.value.security_groups) > 0 ? ingress.value.security_groups : []
     }
   }
+  
   dynamic "egress" {
-    for_each = each.value.egress_rules != null ? each.value.egress_rules : []
- 
+    for_each = length(each.value.egress_rules) > 0 ? each.value.egress_rules : []
     content {
       description = egress.value.description
       from_port   = egress.value.from_port
       to_port     = egress.value.to_port
       protocol    = egress.value.protocol
-      cidr_blocks = egress.value.cidr_blocks != null ? egress.value.cidr_blocks : null
-      security_groups = egress.value.security_groups != null ? egress.value.security_groups : null
+      cidr_blocks = length(egress.value.cidr_blocks) > 0 ? egress.value.cidr_blocks : []
+      security_groups = length(egress.value.security_groups) > 0 ? egress.value.security_groups : []
     }
   }
  
@@ -35,6 +35,7 @@ resource "aws_security_group" "default" {
  
 variable "vpc_id" {
   type = string
+  description = "The ID of the VPC where the security group will be created."
 }
  
 variable "security_groups" {
@@ -60,8 +61,7 @@ variable "security_groups" {
   }))
   default = {}
 }
-output "my-security_gr_id" {
-value = {for k, v in aws_security_group.default: k => v.id}
+
+output "security_group_ids" {
+  value = {for k, v in aws_security_group.default : k => v.id}
 }
-
-
