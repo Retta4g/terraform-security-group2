@@ -1,74 +1,67 @@
-terraform {
-  cloud {
-
-    organization = "02-spring-cloud"
-
-    workspaces {
-      name = "my-workspace-ec2"
+resource "aws_security_group" "default" {
+  for_each    = var.security_groups
+  name        = each.key
+  description = each.value.description
+  vpc_id      = var.vpc_id
+ 
+  dynamic "ingress" {
+    for_each = each.value.ingress_rules != null ? each.value.ingress_rules : []
+    content {
+      description = ingress.value.description
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks != null ? ingress.value.cidr_blocks : null
+      security_groups = ingress.value.security_groups != null ? ingress.value.security_groups : null
     }
   }
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+  dynamic "egress" {
+    for_each = each.value.egress_rules != null ? each.value.egress_rules : []
+ 
+    content {
+      description = egress.value.description
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks = egress.value.cidr_blocks != null ? egress.value.cidr_blocks : null
+      security_groups = egress.value.security_groups != null ? egress.value.security_groups : null
     }
   }
-}
-provider "aws" {}
-
-module "my_vpc" {
-  source         = "./modules/vpc"
-  vpc_cidr_block = "172.15.0.0/16"
-  tag = {
-    Name = "modules_vpc"
+ 
+  tags = {
+    Name = join("-", ["security-group", each.key])
   }
 }
-
-module "security" {
-  source  = "app.terraform.io/02-spring-cloud/security/aws"
-  version = "0.0.0"
-  # insert required variables here
-  vpc_id = module.my_vpc.my_vpc_id
-
-  security_groups = {
-    "web" = {
-      "description" = "Security Group for Web Tier"
-      "ingress_rules" = [
-        {
-          to_port     = 0
-          from_port   = 0
-          cidr_blocks = ["0.0.0.0/0"]
-          protocol    = "-1"
-        },
-        {
-          to_port     = 2
-          from_port   = 2
-          cidr_blocks = ["0.0.0.0/0"]
-          protocol    = "tcp"
-        }
-      ]
-    },
-    "app" = {
-      "description" = "xvyz"
-      "egress_rule s" = [
-        {
-          to_port     = 0
-          from_port   = 0
-          protocol    = "tcp"
-          cidr_blocks = ["0.0.0.0/0"]
-        }
-      ]
-      "ingress_rules" = [
-        {
-          to_port     = 0     # 1
-          from_port   = 0     # 1
-          protocol    = "tcp" #3
-          cidr_blocks = ["0.0.0.0/0"]
-        }
-      ]
-    }
-  }
+ 
+variable "vpc_id" {
+  type = string
 }
-
+ 
+variable "security_groups" {
+  description = "A map of security groups with their rules"
+  type = map(object({
+    description = string
+    ingress_rules = optional(list(object({
+      from_port   = number
+      to_port     = number
+      description = optional(string)
+      cidr_blocks = optional(list(string))
+      security_groups = optional(list(string))
+      protocol    = string
+    })))
+    egress_rules = optional(list(object({
+      from_port   = number
+      to_port     = number
+      description = optional(string)
+      cidr_blocks = optional(list(string))
+      security_groups = optional(list(string))
+      protocol    = string
+    })))
+  }))
+  default = {}
+}
+output "my-security_gr_id" {
+value = {for k, v in aws_security_group.default: k => v.id}
+}
 
 
